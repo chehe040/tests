@@ -1,0 +1,48 @@
+package com.example.helloworld
+
+import com.example.helloworld.model.User
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import spock.lang.Specification
+import com.fasterxml.jackson.databind.ObjectMapper
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+
+@WebMvcTest(HelloWorldController)
+class HelloWorldControllerSpec extends Specification {
+
+    @Autowired
+    MockMvc mockMvc
+
+    @Autowired
+    ObjectMapper objectMapper
+
+    def "should return Hello World for GET /api/hello"() {
+        when: "a GET request is made to /api/hello"
+        def response = mockMvc.perform(get("/api/hello"))
+
+        then: "the response status is OK and the content is 'Hello World'"
+        response.andExpect(status().isOk())
+                .andExpect(content().string("Hello World"))
+    }
+
+    def "should return greeting message for POST /api/hello"() {
+        given: "a User object with name 'Chetna'"
+        User user = new User()
+        user.setName("Chetna")
+
+        when: "a POST request is made to /api/hello with the User object"
+        def response = mockMvc.perform(post("/api/hello")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(user)))
+
+        then: "the response status is OK and the content is 'Hello, Chetna'"
+        response.andExpect(status().isOk())
+                .andExpect(content().string("Hello, Chetna"))
+    }
+}
